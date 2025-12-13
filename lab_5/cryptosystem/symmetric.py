@@ -1,8 +1,12 @@
+import logging
+
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.backends import default_backend
 import os
 
+
+logger = logging.getLogger(__name__)
 
 class Symmetric3DES:
     @staticmethod
@@ -12,7 +16,9 @@ class Symmetric3DES:
         :param key_length: Key length (64, 128, 192)
         :return: Unencrypted symmetric key
         """
-        return os.urandom(key_length // 8)
+        key = os.urandom(key_length // 8)
+        logger.debug(f"Symmetric key of size {key_length} bits was generated")
+        return key
 
     @staticmethod
     def encrypt(data: bytes, key: bytes) -> bytes:
@@ -22,6 +28,7 @@ class Symmetric3DES:
         :param key: Symmetric key
         :return: Encrypted data
         """
+        logger.debug(f"3DES encryption, text size: {len(data)} characters")
         iv = os.urandom(8)  # 3DES block size
         padder = sym_padding.PKCS7(algorithms.TripleDES.block_size).padder()  # 64 bits = 8 bytes block size
         padded_data = padder.update(data) + padder.finalize()
@@ -33,6 +40,7 @@ class Symmetric3DES:
         )
         encryptor = cipher.encryptor()
         ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+        logger.debug(f"3DES encryption completed, result size: {len(iv + ciphertext)} characters")
         return iv + ciphertext
 
     @staticmethod
@@ -43,6 +51,7 @@ class Symmetric3DES:
         :param key: Symmetric key
         :return: Decrypted data
         """
+        logger.debug(f"3DES decryption, text size: {len(data)} characters")
         iv = data[:8]
         ct = data[8:]
 
@@ -56,4 +65,5 @@ class Symmetric3DES:
 
         unpadder = sym_padding.PKCS7(algorithms.TripleDES.block_size).unpadder()
         data = unpadder.update(padded_data) + unpadder.finalize()
+        logger.debug(f"3DES decryption completed, result size: {len(data)} characters")
         return data

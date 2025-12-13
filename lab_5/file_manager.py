@@ -1,5 +1,8 @@
 import json
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 class FileManager:
 
@@ -12,12 +15,14 @@ class FileManager:
         :return: None
         """
         try:
+            logger.debug(f"Saving file: {path}")
             with open(path, "wb") as f:
                 f.write(data)
+            logger.debug(f"File {path} saved successfully, size: {len(data)} characters")
         except FileNotFoundError:
-            raise FileNotFoundError(f"The file was not found: {path}")
+            logger.error(f"The file was not found: {path}")
         except Exception as e:
-            raise Exception(f"An error occurred with the file: {str(e)}")
+            logger.error(f"An error occurred with the file: {str(e)}")
 
     @staticmethod
     def load_bytes(path: str) -> bytes:
@@ -27,12 +32,15 @@ class FileManager:
         :return: bytes format object
         """
         try:
+            logger.debug(f"Reading file: {path}")
             with open(path, "rb") as f:
-                return f.read()
+                content = f.read()
+                logger.debug(f"File {path} successfully read, size: {len(content)} characters")
+                return content
         except FileNotFoundError:
-            raise FileNotFoundError(f"The file was not found: {path}")
+            logger.error(f"The file was not found: {path}")
         except Exception as e:
-            raise Exception(f"An error occurred with the file: {str(e)}")
+            logger.error(f"An error occurred with the file: {str(e)}")
 
     @staticmethod
     def load_json(json_path: str) -> dict:
@@ -42,12 +50,15 @@ class FileManager:
         :return: dictionary
         """
         try:
+            logger.debug(f"Reading file: {json_path}")
             with open(json_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                content = json.load(f)
+                logger.debug(f"File {json_path} successfully read, size: {len(content)} characters")
+                return content
         except FileNotFoundError:
-            raise FileNotFoundError(f"JSON file not found: {json_path}")
+            logger.error(f"JSON file not found: {json_path}")
         except json.JSONDecodeError:
-            raise ValueError(f"Invalid JSON format in file: {json_path}")
+            logger.error(f"Invalid JSON format in file: {json_path}")
 
     @staticmethod
     def read_file(filename: str) -> str:
@@ -57,14 +68,17 @@ class FileManager:
         :return: String with file contents
         """
         try:
+            logger.debug(f"Reading file: {filename}")
             with open(filename, "r", encoding="utf-8") as file:
-                return file.read()
+                content = file.read()
+                logger.debug(f"File {filename} successfully read, size: {len(content)} characters")
+                return content
         except FileNotFoundError as e:
-            print(f"File doesn't exist or the path specified is invalid: {e}")
+            logger.error(f"File doesn't exist or the path specified is invalid: {e}")
         except PermissionError as e:
-            print(f"Can't access this file: {e}")
+            logger.error(f"Can't access this file: {e}")
         except Exception as e:
-            print(f"Error reading file: {e}. Check for correct data")
+            logger.error(f"Error reading file: {e}. Check for correct data")
 
     @staticmethod
     def write_file(filename: str, data: str) -> None:
@@ -75,7 +89,9 @@ class FileManager:
         :return: None
         """
         try:
+            logger.debug(f"Saving file: {filename}")
             with open(filename, "w", encoding="utf-8") as file:
                 file.write(data)
+            logger.debug(f"File {filename} saved successfully, size: {len(data)} characters")
         except Exception as e:
-            print(f"Something went wrong: {e}")
+            logger.error(f"Something went wrong: {e}")

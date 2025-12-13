@@ -1,7 +1,16 @@
 import argparse
+import logging
 
 from cryptosystem.hybrid_system import HybridCryptoSystem
 from file_manager import FileManager
+
+
+logging.basicConfig(
+    filename = 'result.log',
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+)
+logger = logging.getLogger(__name__)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -9,6 +18,7 @@ def parse_arguments() -> argparse.Namespace:
     Function parses arguments from cmd
     :return: Object with arguments
     """
+    logger.debug("Parsing arguments from cmd")
     parser = argparse.ArgumentParser(
         description = "Hybrid crypto system (RSA + 3DES)",
         formatter_class = argparse.ArgumentDefaultsHelpFormatter
@@ -30,7 +40,7 @@ def main():
     try:
         args = parse_arguments()
         if args.key_length not in (64, 128, 192):
-            raise ValueError("3DES key length must be 64, 128 or 192 bits")
+            logger.error("3DES key length must be 64, 128 or 192 bits")
         settings = FileManager.load_json(args.settings)
 
         if args.generation:
@@ -40,7 +50,7 @@ def main():
                 settings["public_key"],
                 settings["symmetric_key"]
             )
-            print(
+            logger.info(
                 f"Keys generated and saved:\n"
                 f" - Private key: {settings['private_key']}\n"
                 f" - Public key: {settings['public_key']}\n"
@@ -53,7 +63,7 @@ def main():
                 settings["symmetric_key"],
                 settings["encrypted_file"]
             )
-            print(f"File encrypted and saved to {settings['encrypted_file']}")
+            logger.info(f"File encrypted and saved to {settings['encrypted_file']}")
         elif args.decryption:
             HybridCryptoSystem.decrypt(
                 settings["encrypted_file"],
@@ -61,9 +71,9 @@ def main():
                 settings["symmetric_key"],
                 settings["decrypted_file"]
             )
-            print(f"File decrypted and saved to {settings['decrypted_file']}")
+            logger.info(f"File decrypted and saved to {settings['decrypted_file']}")
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
 
 
 if __name__ == '__main__':

@@ -1,3 +1,5 @@
+import logging
+
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.backends import default_backend
@@ -6,6 +8,8 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from file_manager import FileManager
 
 
+logger = logging.getLogger(__name__)
+
 class AsymmetricRSA:
     @staticmethod
     def generate_keys() -> (rsa.RSAPrivateKey, rsa.RSAPublicKey):
@@ -13,10 +17,12 @@ class AsymmetricRSA:
         Generates public and private RSA keys
         :return: Private key, public key
         """
+        logger.debug("RSA key generation")
         private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048
         )
+        logger.debug("RSA keys generated successfully")
         public_key = private_key.public_key()
         return private_key, public_key
 
@@ -31,6 +37,7 @@ class AsymmetricRSA:
         :param public_path: Path to file to save public key
         :return: None
         """
+        logger.debug("RSA keys saving")
         private_pem = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
@@ -51,17 +58,19 @@ class AsymmetricRSA:
         :return: private key
         """
         try:
+            logger.debug("Loading RSA private key")
             key_data = FileManager.load_bytes(path)
             private_key = serialization.load_pem_private_key(
                 key_data,
                 password=None,
                 backend=default_backend()
             )
+            logger.debug("Loading RSA private key successfully")
             return private_key
         except UnsupportedAlgorithm:
-            raise Exception("Unsupported key algorithm")
+            logger.error("Unsupported key algorithm")
         except ValueError:
-            raise Exception("Invalid key format")
+            logger.error("Invalid key format")
 
     @staticmethod
     def encrypt(data: bytes, public_key: rsa.RSAPublicKey) -> bytes:
@@ -71,7 +80,8 @@ class AsymmetricRSA:
         :param public_key: Public key
         :return: Encrypted data
         """
-        return public_key.encrypt(
+        logger.debug(f"RSA encryption, data size: {len(data)} bytes")
+        result = public_key.encrypt(
             data,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -79,6 +89,8 @@ class AsymmetricRSA:
                 label=None
             )
         )
+        logger.debug(f"RSA encryption complete, result size: {len(result)} bytes")
+        return result
 
     @staticmethod
     def decrypt(data: bytes, private_key: rsa.RSAPrivateKey) -> bytes:
@@ -88,7 +100,8 @@ class AsymmetricRSA:
         :param private_key: Private key
         :return: Decrypted data
         """
-        return private_key.decrypt(
+        logger.debug(f"RSA decryption, data size: {len(data)} bytes")
+        result = private_key.decrypt(
             data,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -96,3 +109,5 @@ class AsymmetricRSA:
                 label=None
             )
         )
+        logger.debug(f"RSA decryption complete, result size: {len(result)} bytes")
+        return result
