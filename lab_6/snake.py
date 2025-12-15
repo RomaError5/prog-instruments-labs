@@ -20,6 +20,11 @@ KEY = {
 }
 BACKGROUND_COLOR = pygame.Color(0, 255, 255)
 
+pygame.init()
+pygame.display.set_caption("$nAke bRo color fUll--FASAL ")
+pygame.font.init()
+random.seed()
+
 # Screen initialization
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.HWSURFACE)
 
@@ -322,18 +327,13 @@ def draw_score(score):
 
 def draw_game_time(game_time):
     """Draw the game time on the screen"""
-    game_time = score_font.render("Time:", 1, pygame.Color("red"))
+    game_time_msg = score_font.render("Time:", 1, pygame.Color("red"))
     game_time_numb = score_numb_font.render(str(game_time / 1000), 1, pygame.Color("red"))
-    screen.blit(game_time, (30, 10))
+    screen.blit(game_time_msg, (30, 10))
     screen.blit(game_time_numb, (105, 14))
 
 
 def main():
-    pygame.init()
-    pygame.display.set_caption("$nAke bRo color fUll--FASAL ")
-    pygame.font.init()
-    random.seed()
-
     # Game variables
     score = 0
 
